@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.MiyaofafangDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.miyao_id as miyaoId
+        ,a.xuesheng_id as xueshengId
+        ,a.miyaofafan_time as miyaofafanTime
+        ,a.miyaofafang_types as miyaofafangTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.MiyaofafangView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,miyao.miyao_uuid_number as miyaoUuidNumber
+        ,miyao.miyao_name as miyaoName
+        ,miyao.miyao_types as miyaoTypes
+        ,miyao.yonghu_id as miyaoYonghuId
+        ,miyao.miyao_content as miyaoContent
+        ,miyao.miyao_yesno_types as miyaoYesnoTypes
+        ,miyao.miyao_yesno_text as miyaoYesnoText
+        ,xuesheng.xuesheng_name as xueshengName
+        ,xuesheng.xuesheng_photo as xueshengPhoto
+        ,xuesheng.xuesheng_id_number as xueshengIdNumber
+        ,xuesheng.xuesheng_phone as xueshengPhone
+        ,xuesheng.xuesheng_email as xueshengEmail
+        ,xuesheng.xuexiao_types as xuexiaoTypes
+        ,xuesheng.xueyuan_types as xueyuanTypes
+        ,xuesheng.zhuanye_types as zhuanyeTypes
+        ,xuesheng.xuesheng_delete as xueshengDelete
+
+        FROM miyaofafang  a
+        left JOIN miyao miyao ON a.miyao_id = miyao.id
+        left JOIN xuesheng xuesheng ON a.xuesheng_id = xuesheng.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.miyaoId != null and params.miyaoId != ''">
+                and (
+                    a.miyao_id = #{params.miyaoId}
+                )
+            </if>
+            <if test="params.xueshengId != null and params.xueshengId != ''">
+                and (
+                    a.xuesheng_id = #{params.xueshengId}
+                )
+            </if>
+            <if test=" params.miyaofafanTimeStart != '' and params.miyaofafanTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.miyaofafan_time) >= UNIX_TIMESTAMP(#{params.miyaofafanTimeStart}) ]]>
+            </if>
+            <if test=" params.miyaofafanTimeEnd != '' and params.miyaofafanTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.miyaofafan_time) <= UNIX_TIMESTAMP(#{params.miyaofafanTimeEnd}) ]]>
+            </if>
+            <if test="params.miyaofafangTypes != null and params.miyaofafangTypes != ''">
+                and a.miyaofafang_types = #{params.miyaofafangTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断密钥的id不为空 -->
+            <if test=" params.miyaoIdNotNull != '' and params.miyaoIdNotNull != null and params.miyaoIdNotNull != 'null' ">
+                and a.miyao_id IS NOT NULL
+            </if>
+            <if test=" params.miyaoUuidNumber != '' and params.miyaoUuidNumber != null and params.miyaoUuidNumber != 'null' ">
+                and miyao.miyao_uuid_number like CONCAT('%',#{params.miyaoUuidNumber},'%')
+            </if>
+            <if test=" params.miyaoName != '' and params.miyaoName != null and params.miyaoName != 'null' ">
+                and miyao.miyao_name like CONCAT('%',#{params.miyaoName},'%')
+            </if>
+            <if test="params.miyaoTypes != null  and params.miyaoTypes != ''">
+                and miyao.miyao_types = #{params.miyaoTypes}
+            </if>
+
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and miyao.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.miyaoContent != '' and params.miyaoContent != null and params.miyaoContent != 'null' ">
+                and miyao.miyao_content like CONCAT('%',#{params.miyaoContent},'%')
+            </if>
+            <if test="params.miyaoYesnoTypes != null  and params.miyaoYesnoTypes != ''">
+                and miyao.miyao_yesno_types = #{params.miyaoYesnoTypes}
+            </if>
+
+            <if test=" params.miyaoYesnoText != '' and params.miyaoYesnoText != null and params.miyaoYesnoText != 'null' ">
+                and miyao.miyao_yesno_text like CONCAT('%',#{params.miyaoYesnoText},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(miyao.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(miyao.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断学生的id不为空 -->
+            <if test=" params.xueshengIdNotNull != '' and params.xueshengIdNotNull != null and params.xueshengIdNotNull != 'null' ">
+                and a.xuesheng_id IS NOT NULL
+            </if>
+            <if test=" params.xueshengName != '' and params.xueshengName != null and params.xueshengName != 'null' ">
+                and xuesheng.xuesheng_name like CONCAT('%',#{params.xueshengName},'%')
+            </if>
+            <if test=" params.xueshengIdNumber != '' and params.xueshengIdNumber != null and params.xueshengIdNumber != 'null' ">
+                and xuesheng.xuesheng_id_number like CONCAT('%',#{params.xueshengIdNumber},'%')
+            </if>
+            <if test=" params.xueshengPhone != '' and params.xueshengPhone != null and params.xueshengPhone != 'null' ">
+                and xuesheng.xuesheng_phone like CONCAT('%',#{params.xueshengPhone},'%')
+            </if>
+            <if test=" params.xueshengEmail != '' and params.xueshengEmail != null and params.xueshengEmail != 'null' ">
+                and xuesheng.xuesheng_email like CONCAT('%',#{params.xueshengEmail},'%')
+            </if>
+            <if test="params.xuexiaoTypes != null  and params.xuexiaoTypes != ''">
+                and xuesheng.xuexiao_types = #{params.xuexiaoTypes}
+            </if>
+
+            <if test="params.xueyuanTypes != null  and params.xueyuanTypes != ''">
+                and xuesheng.xueyuan_types = #{params.xueyuanTypes}
+            </if>
+
+            <if test="params.zhuanyeTypes != null  and params.zhuanyeTypes != ''">
+                and xuesheng.zhuanye_types = #{params.zhuanyeTypes}
+            </if>
+
+            <if test="params.xueshengDeleteStart != null  and params.xueshengDeleteStart != '' ">
+                <![CDATA[  and xuesheng.xuesheng_delete >= #{params.xueshengDeleteStart}   ]]>
+            </if>
+            <if test="params.xueshengDeleteEnd != null  and params.xueshengDeleteEnd != '' ">
+                <![CDATA[  and xuesheng.xuesheng_delete <= #{params.xueshengDeleteEnd}   ]]>
+            </if>
+            <if test="params.xueshengDelete != null  and params.xueshengDelete != '' ">
+                and xuesheng.xuesheng_delete = #{params.xueshengDelete}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

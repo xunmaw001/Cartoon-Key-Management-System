@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.MiyaorizhiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.miyaorizhi_name as miyaorizhiName
+        ,a.miyaorizhi_types as miyaorizhiTypes
+        ,a.miyaofafang_id as miyaofafangId
+        ,a.yonghu_id as yonghuId
+        ,a.insert_time as insertTime
+        ,a.miyaorizhi_content as miyaorizhiContent
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.MiyaorizhiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,miyaofafang.xuesheng_id as miyaofafangXueshengId
+        ,miyaofafang.miyaofafan_time as miyaofafanTime
+        ,miyaofafang.miyaofafang_types as miyaofafangTypes
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.yonghu_delete as yonghuDelete
+
+        FROM miyaorizhi  a
+        left JOIN miyaofafang miyaofafang ON a.miyaofafang_id = miyaofafang.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.miyaorizhiName != '' and params.miyaorizhiName != null and params.miyaorizhiName != 'null' ">
+                and a.miyaorizhi_name like CONCAT('%',#{params.miyaorizhiName},'%')
+            </if>
+            <if test="params.miyaorizhiTypes != null and params.miyaorizhiTypes != ''">
+                and a.miyaorizhi_types = #{params.miyaorizhiTypes}
+            </if>
+            <if test="params.miyaofafangId != null and params.miyaofafangId != ''">
+                and (
+                    a.miyaofafang_id = #{params.miyaofafangId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test=" params.miyaorizhiContent != '' and params.miyaorizhiContent != null and params.miyaorizhiContent != 'null' ">
+                and a.miyaorizhi_content like CONCAT('%',#{params.miyaorizhiContent},'%')
+            </if>
+
+                <!-- 判断密钥发放的id不为空 -->
+            <if test=" params.miyaofafangIdNotNull != '' and params.miyaofafangIdNotNull != null and params.miyaofafangIdNotNull != 'null' ">
+                and a.miyaofafang_id IS NOT NULL
+            </if>
+            <if test="params.miyaoId != null  and params.miyaoId != ''">
+                and miyaofafang.miyao_id = #{params.miyaoId}
+            </if>
+            <if test="params.xueshengId != null  and params.xueshengId != ''">
+                and miyaofafang.xuesheng_id = #{params.xueshengId}
+            </if>
+            <if test=" params.miyaofafanTimeStart != '' and params.miyaofafanTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(miyaofafang.miyaofafan_time) >= UNIX_TIMESTAMP(#{params.miyaofafanTimeStart}) ]]>
+            </if>
+            <if test=" params.miyaofafanTimeEnd != '' and params.miyaofafanTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(miyaofafang.miyaofafan_time) <= UNIX_TIMESTAMP(#{params.miyaofafanTimeEnd}) ]]>
+            </if>
+            <if test="params.miyaofafangTypes != null  and params.miyaofafangTypes != ''">
+                and miyaofafang.miyaofafang_types = #{params.miyaofafangTypes}
+            </if>
+
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(miyaofafang.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(miyaofafang.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断工作人员的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.yonghuDeleteStart != null  and params.yonghuDeleteStart != '' ">
+                <![CDATA[  and yonghu.yonghu_delete >= #{params.yonghuDeleteStart}   ]]>
+            </if>
+            <if test="params.yonghuDeleteEnd != null  and params.yonghuDeleteEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_delete <= #{params.yonghuDeleteEnd}   ]]>
+            </if>
+            <if test="params.yonghuDelete != null  and params.yonghuDelete != '' ">
+                and yonghu.yonghu_delete = #{params.yonghuDelete}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
